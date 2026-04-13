@@ -1,0 +1,17 @@
+cookie:
+  expiry_days: 1
+  key: random_signature_key
+  name: finance_tracker_cookie
+credentials:
+  usernames:
+    shreyas:
+      email: shreyas@example.com
+      name: Shreyas Singh
+      password: $2b$12$joeOHIc.BKXnuzmtK8h67echEZbb0G86V/szwozFt4NHoXwnvbDzK
+    shreyas40:
+      email: shreyassingh40@gmail.com
+      name: Shreyas40
+      password: $2b$12$ygoxP3i0wB7ZOT1j318dvu.diQQ4wrBOGhexo1S26wYYx36iJ5S1.
+preauthorized:
+  emails:
+  - shreyas@example.com
