@@ -1,38 +1,47 @@
+# 2_Create_Account.py
+# --------------------------------------------------------
+# Create account page for Personal Finance Tracker
+# --------------------------------------------------------
+
 import streamlit as st
-import bcrypt
 import yaml
+from yaml.loader import SafeLoader
+from pathlib import Path
+from streamlit_authenticator import Authenticate
 
-st.title("🆕 Create Account")
-st.write("Fill in the details below to register.")
+st.set_page_config(page_title="Create Account | Personal Finance Tracker", layout="centered")
 
-username = st.text_input("Choose a Username")
-email = st.text_input("Email")
-password = st.text_input("Password", type="password")
-confirm = st.text_input("Confirm Password", type="password")
+# --- Load config from project root ---
+ROOT_DIR = Path(__file__).resolve().parent.parent
+CONFIG_PATH = ROOT_DIR / "auth_config.yaml"
 
-if st.button("Create Account"):
-    if password != confirm:
-        st.error("Passwords do not match.")
-    elif not username or not password:
-        st.warning("Please fill out all fields.")
-    else:
-        hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-        
-        # Append new user to YAML
-        with open("auth_config.yaml") as file:
-            config = yaml.safe_load(file)
+with open(CONFIG_PATH, "r") as file:
+    config = yaml.load(file, Loader=SafeLoader)
 
-        if username in config["credentials"]["usernames"]:
-            st.error("Username already exists.")
-        else:
-            config["credentials"]["usernames"][username] = {
-                "email": email,
-                "name": username.title(),
-                "password": hashed_pw
-            }
+# --- Create authenticator ---
+authenticator = Authenticate(
+    config["credentials"],
+    config["cookie"]["name"],
+    config["cookie"]["key"],
+    config["cookie"]["expiry_days"],
+    config["preauthorized"]
+)
 
-            with open("auth_config.yaml", "w") as file:
-                yaml.dump(config, file)
+# --- Page UI ---
+st.title("📝 Create Account")
+st.write("Create a new account for the Personal Finance Tracker.")
 
-            st.success("Account created successfully! Please log in.")
-            st.switch_page("1_Login.py")
+try:
+    email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(
+        pre_authorized=False
+    )
+
+    if email_of_registered_user:
+        st.success("User registered successfully.")
+
+        # Save updated config back to file
+        with open(CONFIG_PATH, "w") as file:
+            yaml.dump(config, file, default_flow_style=False)
+
+except Exception as e:
+    st.error(f"Error: {e}")
