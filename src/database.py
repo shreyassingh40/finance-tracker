@@ -53,10 +53,10 @@ def insert_transaction(date, category, type, amount, description):
     """
     with connect_db() as conn:
         cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO transactions (date, category, type, amount, description)
-            VALUES (?, ?, ?, ?, ?)
-        """, (date, category, type, amount, description))
+        cur.execute(
+            "INSERT INTO transactions (date, category, type, amount, description) VALUES (?, ?, ?, ?, ?)",
+            (date, category.strip().title(), type, float(amount), description.strip()),
+        )
         conn.commit()
 
 def fetch_transactions():
@@ -69,6 +69,6 @@ def fetch_transactions():
         cur.execute("""
             SELECT id, date, category, type, amount, description
             FROM transactions
-            ORDER BY date ASC
+            ORDER BY date ASC, id ASC
         """)
         return cur.fetchall()

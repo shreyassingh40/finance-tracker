@@ -5,59 +5,57 @@
 # ----------------------------------------------------------
 
 import pandas as pd
-from src.database import fetch_transactions  # reuses database functions
+from src.database import fetch_transactions
 
 def load_data():
-    """
-    Load all transactions from the database and return them as a Pandas DataFrame.
-    If there are no transactions yet, it returns an empty DataFrame.
-    """
-    data = fetch_transactions()  # Get rows from DB
-    columns = ["id", "date", "category", "type", "amount", "description"]
-    df = pd.DataFrame(data, columns=columns)
+    rows = fetch_transactions()
 
-    # Convert the 'date' column into a proper datetime format (for grouping)
-    if not df.empty:
-        df["date"] = pd.to_datetime(df["date"])
+    if not rows:
+        return pd.DataFrame(columns=["id", "date", "category", "type", "amount", "description"])
+
+    df = pd.DataFrame(
+        rows,
+        columns=["id", "date", "category", "type", "amount", "description"]
+    )
+
+    df["date"] = pd.to_datetime(df["date"])
+    df["category"] = df["category"].astype(str).str.strip().str.title()
+    df["type"] = df["type"].astype(str).str.strip().str.lower()
+    df["amount"] = pd.to_numeric(df["amount"], errors="coerce").fillna(0)
+
     return df
 
 def monthly_summary(df):
-    """
-    Create a monthly summary that compares income and expenses.
-    Returns a new DataFrame with total income and expense per month.
-    """
     if df.empty:
-        return pd.DataFrame(columns=["month", "income", "expense"])
+        return pd.DataFrame()
 
-    # Extract month (YYYY-MM)
-    df["month"] = df["date"].dt.to_period("M")
+    monthly_df = df.copy()
+    monthly_df["month"] = monthly_df["date"].dt.to_period("M").astype(str)
 
-    # Group by month and type, then sum up
     summary = (
-        df.groupby(["month", "type"])["amount"]
-          .sum()
-          .unstack(fill_value=0)
-          .reset_index()
+        monthly_df.groupby(["month", "type"])["amount"]
+        .sum()
+        .unstack(fill_value=0)
+        .reset_index()
+        .sort_values("month")
     )
 
-    # Rename columns for clarity
-    summary.columns.name = None
     return summary
 
 def category_breakdown(df):
-    """
-    Summarize spending by category.
-    Returns a DataFrame sorted by total amount descending.
-    """
     if df.empty:
+        return pd.DataFrame()
+
+    expense_df = df[df["type"] == "expense"].copy()
+
+    if expense_df.empty:
         return pd.DataFrame(columns=["category", "total"])
 
-    # Group by category and sum amounts
-    breakdown = (
-        df.groupby("category")["amount"]
-          .sum()
-          .reset_index()
-          .sort_values("amount", ascending=False)
+    category_df = (
+        expense_df.groupby("category", as_index=False)["amount"]
+        .sum()
+        .rename(columns={"amount": "total"})
+        .sort_values("total", ascending=False)
     )
-    breakdown.rename(columns={"amount": "total"}, inplace=True)
-    return breakdown
+
+    return category_df
