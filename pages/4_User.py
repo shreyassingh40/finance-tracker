@@ -65,29 +65,18 @@ else:
 
 profile = profiles.get(username, {"name": name, "email": "", "bio": ""})
 
-# STATS
-df = load_data()
-
-income = df[df["type"] == "income"]["amount"].sum() if not df.empty else 0
-expense = df[df["type"] == "expense"]["amount"].sum() if not df.empty else 0
-
-c1, c2 = st.columns(2)
-c1.metric("Total Income", f"${income:.2f}")
-c2.metric("Total Expenses", f"${expense:.2f}")
-
-st.divider()
-
-# PROFILE VIEW / EDIT
+    # PROFILE VIEW / EDIT
 if "edit" not in st.session_state:
     st.session_state.edit = False
 
+st.title("👤 Profile")
+
 if not st.session_state.edit:
-    st.title("👤 Profile")
     st.write(f"**Name:** {profile['name']}")
     st.write(f"**Email:** {profile['email']}")
     st.write(f"**Bio:** {profile['bio']}")
 
-    if st.button("Edit"):
+    if st.button("Edit Profile"):
         st.session_state.edit = True
         st.rerun()
 else:
@@ -95,13 +84,39 @@ else:
     email_in = st.text_input("Email", value=profile["email"])
     bio_in = st.text_area("Bio", value=profile["bio"])
 
-    if st.button("Save"):
-        profiles[username] = {
-            "name": name_in,
-            "email": email_in,
-            "bio": bio_in
-        }
-        json.dump(profiles, open(PROFILE_PATH, "w"))
-        st.session_state.edit = False
-        st.success("Saved!")
-        st.rerun()
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Save Changes"):
+            profiles[username] = {
+                "name": name_in,
+                "email": email_in,
+                "bio": bio_in
+            }
+            json.dump(profiles, open(PROFILE_PATH, "w"))
+            st.session_state.edit = False
+            st.success("Profile updated successfully!")
+            st.rerun()
+
+    with col2:
+        if st.button("Cancel"):
+            st.session_state.edit = False
+            st.rerun()
+
+st.divider()
+
+# FINANCIAL OVERVIEW
+st.subheader("📈 Financial Overview")
+
+df = load_data()
+
+income = df[df["type"] == "income"]["amount"].sum() if not df.empty else 0
+expense = df[df["type"] == "expense"]["amount"].sum() if not df.empty else 0
+net = income - expense
+transaction_count = len(df) if not df.empty else 0
+
+c1, c2, c3, c4 = st.columns(4)
+c1.metric("Transactions", transaction_count)
+c2.metric("Total Income", f"${income:.2f}")
+c3.metric("Total Expenses", f"${expense:.2f}")
+c4.metric("Net Balance", f"${net:.2f}")
