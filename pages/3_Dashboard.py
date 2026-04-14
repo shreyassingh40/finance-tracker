@@ -14,7 +14,7 @@ import yaml
 from yaml.loader import SafeLoader
 from streamlit_authenticator import Authenticate
 
-from src.database import create_table, insert_transaction
+from src.database import create_table, insert_transaction, fetch_transactions
 from src.analytics import load_data, monthly_summary, category_breakdown
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -88,11 +88,11 @@ with st.form("form"):
 
     if st.form_submit_button("Add"):
         if amount > 0:
-            insert_transaction(str(t_date), category, t_type, amount, desc)
+            insert_transaction(username, str(t_date), category, t_type, amount, desc)
             st.success("Added!")
 
 # Analytics
-df = load_data()
+df = load_data(username)
 
 if not df.empty:
     income = df[df["type"] == "income"]["amount"].sum()

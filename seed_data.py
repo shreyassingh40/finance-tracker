@@ -1,19 +1,18 @@
 # seed_data.py
 # --------------------------------------------------------
-# Seed sample transaction data into finance.db
-# Run once to populate the dashboard with realistic data
+# Seed sample transaction data into finance.db for one user
 # --------------------------------------------------------
 
 from src.database import create_table, insert_transaction, fetch_transactions
 
+SEED_USERNAME = "Shreyas40"   # change this to the exact username you want seeded
+
 def seed_transactions():
-    # Create table if it does not already exist
     create_table()
 
-    # Prevent duplicate seeding
-    existing = fetch_transactions()
+    existing = fetch_transactions(SEED_USERNAME)
     if existing:
-        print("Database already contains data. Seed skipped.")
+        print(f"Database already contains data for {SEED_USERNAME}. Seed skipped.")
         return
 
     sample_data = [
@@ -49,34 +48,12 @@ def seed_transactions():
         ("2025-12-11", "Utilities", "expense", 102.00, "Power and water"),
         ("2025-12-13", "Health", "expense", 28.00, "Supplements"),
         ("2025-12-16", "Other", "expense", 55.00, "Gift purchase"),
-
-        ("2026-01-01", "Salary", "income", 3000, "Monthly salary"),
-        ("2026-01-02", "Rent", "expense", 1200, "Monthly rent payment"),
-        ("2026-01-04", "Food", "expense", 19.00, "Takeaway dinner"),
-        ("2026-01-06", "Transport", "expense", 24.00, "Public transport"),
-        ("2026-01-07", "Shopping", "expense", 65.00, "Gym clothes"),
-        ("2026-01-09", "Entertainment", "expense", 35.00, "Streaming and games"),
-        ("2026-01-10", "Food", "expense", 77.30, "Groceries"),
-        ("2026-01-12", "Utilities", "expense", 91.00, "Phone and internet"),
-        ("2026-01-15", "Health", "expense", 20.00, "Protein shake"),
-        ("2026-01-18", "Other", "expense", 25.00, "Printing and stationery"),
-
-        ("2026-02-01", "Salary", "income", 3000, "Monthly salary"),
-        ("2026-02-02", "Rent", "expense", 1200, "Monthly rent payment"),
-        ("2026-02-03", "Food", "expense", 17.80, "Lunch"),
-        ("2026-02-05", "Transport", "expense", 22.00, "Bus card top-up"),
-        ("2026-02-06", "Shopping", "expense", 95.00, "Headphones"),
-        ("2026-02-08", "Entertainment", "expense", 50.00, "Bowling night"),
-        ("2026-02-10", "Food", "expense", 79.90, "Groceries"),
-        ("2026-02-13", "Utilities", "expense", 93.00, "Electricity and water"),
-        ("2026-02-15", "Health", "expense", 26.00, "Pharmacy"),
-        ("2026-02-18", "Other", "expense", 38.00, "Miscellaneous costs"),
     ]
 
     for row in sample_data:
-        insert_transaction(*row)
+        insert_transaction(SEED_USERNAME, *row)
 
-    print(f"Inserted {len(sample_data)} sample transactions.")
+    print(f"Inserted {len(sample_data)} sample transactions for {SEED_USERNAME}.")
 
 if __name__ == "__main__":
     seed_transactions()

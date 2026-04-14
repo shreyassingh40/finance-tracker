@@ -108,7 +108,7 @@ st.divider()
 # FINANCIAL OVERVIEW
 st.subheader("📈 Financial Overview")
 
-df = load_data()
+df = load_data(username)
 
 income = df[df["type"] == "income"]["amount"].sum() if not df.empty else 0
 expense = df[df["type"] == "expense"]["amount"].sum() if not df.empty else 0

@@ -1,21 +1,20 @@
 # analytics.py
-# ----------------------------------------------------------
-# This module loads transaction data from the database
-# and performs simple financial analysis using Pandas.
-# ----------------------------------------------------------
+# --------------------------------------------------------
+# Analytics functions for Personal Finance Tracker
+# --------------------------------------------------------
 
 import pandas as pd
 from src.database import fetch_transactions
 
-def load_data():
-    rows = fetch_transactions()
+def load_data(username):
+    rows = fetch_transactions(username)
 
     if not rows:
-        return pd.DataFrame(columns=["id", "date", "category", "type", "amount", "description"])
+        return pd.DataFrame(columns=["id", "username", "date", "category", "type", "amount", "description"])
 
     df = pd.DataFrame(
         rows,
-        columns=["id", "date", "category", "type", "amount", "description"]
+        columns=["id", "username", "date", "category", "type", "amount", "description"]
     )
 
     df["date"] = pd.to_datetime(df["date"])
@@ -27,7 +26,7 @@ def load_data():
 
 def monthly_summary(df):
     if df.empty:
-        return pd.DataFrame()
+        return pd.DataFrame(columns=["month"])
 
     monthly_df = df.copy()
     monthly_df["month"] = monthly_df["date"].dt.to_period("M").astype(str)
@@ -44,18 +43,17 @@ def monthly_summary(df):
 
 def category_breakdown(df):
     if df.empty:
-        return pd.DataFrame()
+        return pd.DataFrame(columns=["category", "amount"])
 
     expense_df = df[df["type"] == "expense"].copy()
 
     if expense_df.empty:
-        return pd.DataFrame(columns=["category", "total"])
+        return pd.DataFrame(columns=["category", "amount"])
 
     category_df = (
         expense_df.groupby("category", as_index=False)["amount"]
         .sum()
-        .rename(columns={"amount": "total"})
-        .sort_values("total", ascending=False)
+        .sort_values("amount", ascending=False)
     )
 
     return category_df
