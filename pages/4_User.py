@@ -41,11 +41,17 @@ with st.sidebar:
     st.divider()
 
     st.page_link("pages/3_Dashboard.py", label="Dashboard", icon="📊")
-    st.page_link("pages/4_User.py", label="User", icon="👤")
 
     st.divider()
-    st.write(f"👤 **{name}**")
-    st.caption(f"@{username}")
+
+    st.markdown("### 👤 Account")
+    st.page_link(
+        "pages/4_User.py",
+        label=f"{name}",
+        icon="👤"
+    )
+
+    st.divider()
 
     authenticator.logout("Logout", "sidebar")
 
