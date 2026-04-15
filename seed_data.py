@@ -40,7 +40,7 @@ def seed_transactions():
 
         ("2025-12-01", "Salary", "income", 3000, "Monthly salary"),
         ("2025-12-02", "Rent", "expense", 1200, "Monthly rent payment"),
-        ("2025-12-03", "Food", "expense", 16.20, "Lunch"),
+        ("2025-12-03", "Food", "expense", 16.20, "Lunch"), 
         ("2025-12-05", "Transport", "expense", 30.00, "Fuel"),
         ("2025-12-06", "Entertainment", "expense", 90.00, "Concert ticket"),
         ("2025-12-07", "Shopping", "expense", 150.00, "Holiday shopping"),
