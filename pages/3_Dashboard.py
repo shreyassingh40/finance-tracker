@@ -267,19 +267,68 @@ if not df.empty:
     st.divider()
 
     # --------------------------------------------------------
-    # SMART INSIGHTS (simple derived insights)
+    # SMART INSIGHTS
+    # A few more meaningful observations based on the user's data
     # --------------------------------------------------------
     st.subheader("💡 Insights")
 
     if not expense_df.empty:
-        top_category = (
+        # Top spending category
+        category_totals = (
             expense_df.groupby("category")["amount"]
             .sum()
             .sort_values(ascending=False)
-            .index[0]
         )
+        top_category = category_totals.index[0]
+        top_category_amount = category_totals.iloc[0]
 
-        st.write(f"Top spending category: **{top_category}**")
+        # Largest single expense
+        largest_expense_row = expense_df.loc[expense_df["amount"].idxmax()]
+        largest_expense_amount = largest_expense_row["amount"]
+        largest_expense_category = largest_expense_row["category"]
+        largest_expense_date = largest_expense_row["date"].strftime("%Y-%m-%d")
+
+        # Average expense
+        average_expense = expense_df["amount"].mean()
+
+        # Highest spending month
+        monthly_expense_totals = (
+            expense_df.assign(month=expense_df["date"].dt.to_period("M").astype(str))
+            .groupby("month")["amount"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+        highest_month = monthly_expense_totals.index[0]
+        highest_month_amount = monthly_expense_totals.iloc[0]
+
+        # Saving potential
+        saving_potential = top_category_amount * 0.15
+
+        i1, i2 = st.columns(2)
+
+        with i1:
+            st.info(
+                f"Your highest spending category is **{top_category}**, "
+                f"with a total of **${top_category_amount:.2f}**."
+            )
+            st.info(
+                f"Your average expense transaction is **${average_expense:.2f}**."
+            )
+
+        with i2:
+            st.warning(
+                f"Your largest single expense was **${largest_expense_amount:.2f}** "
+                f"in **{largest_expense_category}** on **{largest_expense_date}**."
+            )
+            st.success(
+                f"If you reduce spending in **{top_category}** by 15%, "
+                f"you could save approximately **${saving_potential:.2f}**."
+            )
+
+        st.markdown(
+            f"📌 Your highest spending month was **{highest_month}**, "
+            f"with total expenses of **${highest_month_amount:.2f}**."
+        )
 
 else:
     st.info("No data available yet. Add transactions to populate your dashboard.")
