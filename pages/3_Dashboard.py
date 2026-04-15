@@ -11,6 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import streamlit as st
 import yaml
+import plotly.express as px
 from yaml.loader import SafeLoader
 from streamlit_authenticator import Authenticate
 
@@ -106,11 +107,38 @@ if not df.empty:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("Monthly")
+        st.subheader("Monthly Income vs Expense Trend")
         summary = monthly_summary(df)
-        st.bar_chart(summary.set_index("month"))
+        st.dataframe(summary, use_container_width=True)
+
+        if not summary.empty:
+            monthly_long = summary.melt(
+                id_vars="month",
+                var_name="Transaction Type",
+                value_name="Amount"
+            )
+
+            fig_trend = px.line(
+                monthly_long,
+                x="month",
+                y="Amount",
+                color="Transaction Type",
+                markers=True,
+                title="Income and Expense Trends Over Time"
+            )
+        st.plotly_chart(fig_trend, use_container_width=True)
 
     with col2:
-        st.subheader("Categories")
+        st.subheader("Expense Category Distribution")
         cats = category_breakdown(df)
-        st.bar_chart(cats.set_index("category"))
+        st.dataframe(cats, use_container_width=True)
+
+        if not cats.empty:
+            fig_donut = px.pie(
+                cats,
+                names="category",
+                values="amount",
+                hole=0.45,
+                title="How Expenses Are Distributed Across Categories"
+            )
+            st.plotly_chart(fig_donut, use_container_width=True)

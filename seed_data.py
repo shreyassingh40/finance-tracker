@@ -5,7 +5,7 @@
 
 from src.database import create_table, insert_transaction, fetch_transactions
 
-SEED_USERNAME = "Shreyas40"   # change this to the exact username you want seeded
+SEED_USERNAME = "shreyas40"   # change this to the exact username you want seeded
 
 def seed_transactions():
     create_table()
