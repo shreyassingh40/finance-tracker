@@ -212,57 +212,71 @@ if not df.empty:
 
     st.divider()
 
-    # --------------------------------------------------------
-    # BEHAVIOURAL ANALYSIS
+        # --------------------------------------------------------
+    # OPTIONAL ANALYSIS VIEWS
+    # Keep the dashboard cleaner by letting the user choose
+    # which deeper analysis they want to explore
     # --------------------------------------------------------
     expense_df = df[df["type"] == "expense"].copy()
 
-    # Average spending
-    st.subheader("📊 Average Expense per Transaction by Category")
-
-    if not expense_df.empty:
-        avg_category_spend = (
-            expense_df.groupby("category", as_index=False)["amount"]
-            .mean()
-            .sort_values("amount", ascending=False)
-        )
-
-        fig_avg = px.bar(avg_category_spend, x="category", y="amount")
-        st.plotly_chart(fig_avg, use_container_width=True)
-
-    # Transaction frequency
-    st.subheader("🧾 Transaction Frequency by Category")
-
-    if not expense_df.empty:
-        category_frequency = (
-            expense_df.groupby("category")
-            .size()
-            .reset_index(name="transaction_count")
-        )
-
-        fig_freq = px.bar(category_frequency, x="category", y="transaction_count")
-        st.plotly_chart(fig_freq, use_container_width=True)
-
     st.divider()
+    st.subheader("📚 Explore More Analysis")
 
-    # --------------------------------------------------------
-    # PATTERN EXPLORATION
-    # --------------------------------------------------------
-    st.subheader("🔎 Expense Pattern Exploration")
+    analysis_view = st.selectbox(
+        "Choose an analysis view",
+        [
+            "Average Expense by Category",
+            "Transaction Frequency by Category",
+            "Expense Pattern Exploration"
+        ]
+    )
 
     if not expense_df.empty:
-        scatter_df = expense_df.copy()
-        scatter_df["day"] = scatter_df["date"].dt.day
+        if analysis_view == "Average Expense by Category":
+            avg_category_spend = (
+                expense_df.groupby("category", as_index=False)["amount"]
+                .mean()
+                .sort_values("amount", ascending=False)
+            )
 
-        fig_scatter = px.scatter(
-            scatter_df,
-            x="day",
-            y="amount",
-            color="category",
-            size="amount",
-            hover_data=["date", "description"]
-        )
-        st.plotly_chart(fig_scatter, use_container_width=True)
+            fig_avg = px.bar(
+                avg_category_spend,
+                x="category",
+                y="amount",
+                title="Average Expense per Transaction by Category"
+            )
+            st.plotly_chart(fig_avg, use_container_width=True)
+
+        elif analysis_view == "Transaction Frequency by Category":
+            category_frequency = (
+                expense_df.groupby("category")
+                .size()
+                .reset_index(name="transaction_count")
+                .sort_values("transaction_count", ascending=False)
+            )
+
+            fig_freq = px.bar(
+                category_frequency,
+                x="category",
+                y="transaction_count",
+                title="Transaction Frequency by Category"
+            )
+            st.plotly_chart(fig_freq, use_container_width=True)
+
+        elif analysis_view == "Expense Pattern Exploration":
+            scatter_df = expense_df.copy()
+            scatter_df["day"] = scatter_df["date"].dt.day
+
+            fig_scatter = px.scatter(
+                scatter_df,
+                x="day",
+                y="amount",
+                color="category",
+                size="amount",
+                hover_data=["date", "description"],
+                title="Expense Amounts by Day of Month"
+            )
+            st.plotly_chart(fig_scatter, use_container_width=True)
 
     st.divider()
 
